@@ -1,5 +1,6 @@
 from aiogram import Bot, Dispatcher, types, Router
 from aiogram.filters import Command
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import asyncio
 import os
 from dotenv import load_dotenv
@@ -17,12 +18,11 @@ async def start_command(message: types.Message):
     user_id = message.from_user.id
     game_url = f"https://telegramproject.vercel.app/?userID={user_id}"
 
-    # Создаем WebApp кнопку для моментального открытия игры
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [types.KeyboardButton(text="Играть", web_app=types.WebAppInfo(url=game_url))]
-        ],
-        resize_keyboard=True
+    # Inline кнопка для запуска WebApp
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Играть", web_app=types.WebAppInfo(url=game_url))]
+        ]
     )
 
     await message.answer("Нажмите 'Играть', чтобы начать игру!", reply_markup=keyboard)
