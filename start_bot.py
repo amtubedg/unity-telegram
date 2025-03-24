@@ -1,8 +1,12 @@
 from aiogram import Bot, Dispatcher, types, Router
 from aiogram.filters import Command
 import asyncio
+import os
+from dotenv import load_dotenv
 
-TOKEN = "a"
+load_dotenv()
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 router = Router()
@@ -11,8 +15,8 @@ router = Router()
 @router.message(Command("start"))
 async def start_command(message: types.Message):
     user_id = message.from_user.id
-    game_url = f"https://telegram-first-test.web.app/?userID={user_id}"
-    
+    game_url = f"https://telegramproject.vercel.app/?userID={user_id}"
+
     # Создаем WebApp кнопку для моментального открытия игры
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=[
