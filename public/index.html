@@ -31,38 +31,65 @@
     // Импорт Firebase SDK
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
-    import { firebaseConfig } from "./firebase-config.js";
+
     
-    // Инициализация Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore();
+    // // Конфигурация Firebase
+    // const firebaseConfig = {
+    //     apiKey: "AIzaSyAD7DOdBRAJfgzzQi9KyMWPT1mrOgKW6tI",
+    //     authDomain: "telegram-js-test1.firebaseapp.com",
+    //     projectId: "telegram-js-test1",
+    //     storageBucket: "telegram-js-test1.firebasestorage.app",
+    //     messagingSenderId: "503004830584",
+    //     appId: "1:503004830584:web:2cc874efc79d8050a3068d",
+    //     measurementId: "G-R9SSSBTNYE"
+    // };
+
+    // // Инициализация Firebase
+    // const app = initializeApp(firebaseConfig);
+    // const db = getFirestore();
 
     // Проверяем, запущено ли в Telegram Web App
     if (window.Telegram && window.Telegram.WebApp) {
-        let user = window.Telegram.WebApp.initDataUnsafe.user;
+    let user = window.Telegram.WebApp.initDataUnsafe.user;
 
-        if (user) {
-            let userId = user.id.toString();
-            let username = user.username || "Без имени";
-            alert("Добро пожаловать, " + username + "!");
-            alert("User ID: " + userId);
-            // Отправляем данные в Unity
-            if (typeof unityInstance !== "undefined") {
-                unityInstance.SendMessage("Code", "SetUserID", userId);
-                unityInstance.SendMessage("Code", "SetUsername", username);
-            }
+    if (user) {
+        let userId = user.id.toString();
+        let username = user.username || "Без имени";
+        alert("Добро пожаловать, " + username + "!");
+        alert("User ID: " + userId);
 
-            // Загружаем данные из Firestore
-            loadUserData(userId);
-
-            // Сохраняем в Firestore
-            saveToFirestore(userId, username);
-        } else {
-            alert("Пользовательские данные недоступны.");
+        if (typeof unityInstance !== "undefined") {
+            unityInstance.SendMessage("Code", "SetUserID", userId);
+            unityInstance.SendMessage("Code", "SetUsername", username);
         }
+
+        // Отправляем данные на безопасный backend
+        fetch("/api/firebase-config", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                userId: userId,
+                username: username
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Данные успешно сохранены через сервер");
+            } else {
+                console.warn("Ошибка при сохранении: ", data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Ошибка при отправке на сервер: ", error);
+        });
     } else {
-        // alert("Не запущено в Telegram Web App.");
+        alert("Пользовательские данные недоступны.");
     }
+}
+
 
    // Функция загрузки данных из Firestore
 async function loadUserData(userId) {
@@ -73,8 +100,8 @@ async function loadUserData(userId) {
             let userData = userDoc.data();
             let jsonData = JSON.stringify(userData);
 
-            // alert("Данные из Firestore: " + jsonData);
-            // Отправляем в Unityadadfa
+            alert("Данные из Firestore: " + jsonData);
+            // Отправляем в Unity
             if (typeof unityInstance !== "undefined") {
                 unityInstance.SendMessage("Code", "SetUserDataFromFirestore", jsonData);
             }
@@ -87,6 +114,7 @@ async function loadUserData(userId) {
         // alert("Ошибка получения данных: " + error.message);
     }
 }
+
 
     // Функция сохранения данных в Firestore
     async function saveToFirestore(userId, username) {
