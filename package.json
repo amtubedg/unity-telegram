@@ -1,7 +1,8 @@
 {
+  "type": "module",
   "dependencies": {
-    "firebase": "^11.4.0",
-    "type": "module"
+    "firebase": "^11.4.0"
+    
   },
   "name": "tgbuild",
   "version": "1.0.0",
