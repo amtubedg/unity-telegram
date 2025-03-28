@@ -33,7 +33,7 @@
     
       async function sendGameData() {
         if (window.Telegram && window.Telegram.WebApp) {
-  const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+  const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
   const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
 
   if (!userId) {
@@ -43,7 +43,7 @@
 
   // Пример данных из игры (замени на свои)
   const gameData = {
-    username,
+    Username: username,
     score: parseInt(prompt("Введите ваш Score:"), 10),
     coins: parseInt(prompt("Введите количество Coins:"), 10),
     level: parseInt(prompt("Введите уровень:"), 10),
