@@ -50,12 +50,12 @@
     experience: parseInt(prompt("Введите опыт:"), 10),
   };
 
-  // Удаляем некорректные данные
-  for (const key in gameData) {
-    if (isNaN(gameData[key])) {
-      delete gameData[key];
-    }
-  }
+  // // Удаляем некорректные данные
+  // for (const key in gameData) {
+  //   if (isNaN(gameData[key])) {
+  //     delete gameData[key];
+  //   }
+  // }
 
   try {
     const response = await fetch("/api/firebase-config", {
