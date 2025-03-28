@@ -28,11 +28,12 @@
   </div>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script type="module">
+
     async function sendScore(userId) {
   try {
     // Получаем score через prompt
     const score = parseInt(prompt("Введите ваш Score:"), 10);
-
+    alert("Score: " + score);
     if (isNaN(score)) {
       alert("Некорректное значение. Введите число.");
       return;
