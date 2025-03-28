@@ -35,7 +35,7 @@
         if (window.Telegram && window.Telegram.WebApp) {
   const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
   const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
-
+          alert(window.Telegram.WebApp.initDataUnsafe.user.username);
   if (!userId) {
     alert("Ошибка: UserID не найден");
     return;
