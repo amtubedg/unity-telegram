@@ -1,5 +1,6 @@
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
 
@@ -32,3 +33,43 @@ export default async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+async function sendScore(userId) {
+  try {
+    // Получаем score через prompt
+    const score = parseInt(prompt("Введите ваш Score:"), 10);
+
+    if (isNaN(score)) {
+      alert("Некорректное значение. Введите число.");
+      return;
+    }
+
+    const userDocRef = doc(db, "users", userId);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      // Если пользователь найден — обновляем Score
+      await updateDoc(userDocRef, {
+        Score: score
+      });
+      alert(`Score успешно обновлён: ${score}`);
+    } else {
+      // Если пользователя нет — создаём нового с Score
+      await setDoc(userDocRef, {
+        TelegramID: userId,
+        Score: score
+      });
+      alert(`Пользователь создан с Score: ${score}`);
+    }
+    console.log(`✅ Score отправлен в Firestore: ${score}`);
+  } catch (error) {
+    console.error("❌ Ошибка при отправке Score:", error);
+    alert("Произошла ошибка при отправке Score.");
+  }
+}
+
+if (userId) {
+  sendScore(userId);
+} else {
+  console.error("Ошибка: UserID не найден.");
+}
