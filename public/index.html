@@ -30,46 +30,54 @@
   <script type="module">
 
     // Проверяем, запущено ли в Telegram Web App
-    if (window.Telegram && window.Telegram.WebApp) {
-    let user = window.Telegram.WebApp.initDataUnsafe.user;
+    
+      async function sendGameData() {
+        if (window.Telegram && window.Telegram.WebApp) {
+  const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+  const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
 
-    if (user) {
-        let userId = user.id.toString();
-        let username = user.username || "Без имени";
-        alert("Добро пожаловать, " + username + "!");
-        alert("User ID: " + userId);
+  if (!userId) {
+    alert("Ошибка: UserID не найден");
+    return;
+  }
 
-        if (typeof unityInstance !== "undefined") {
-            unityInstance.SendMessage("Code", "SetUserID", userId);
-            unityInstance.SendMessage("Code", "SetUsername", username);
-        }
+  // Пример данных из игры (замени на свои)
+  const gameData = {
+    username,
+    score: parseInt(prompt("Введите ваш Score:"), 10),
+    coins: parseInt(prompt("Введите количество Coins:"), 10),
+    level: parseInt(prompt("Введите уровень:"), 10),
+    experience: parseInt(prompt("Введите опыт:"), 10),
+  };
 
-        // Отправляем данные на безопасный backend
-        fetch("/api/firebase-config", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                userId: userId,
-                username: username
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log("Данные успешно сохранены через сервер");
-            } else {
-                console.warn("Ошибка при сохранении: ", data.error);
-            }
-        })
-        .catch(error => {
-            console.error("Ошибка при отправке на сервер: ", error);
-        });
-    } else {
-        alert("Пользовательские данные недоступны.");
+  // Удаляем некорректные данные
+  for (const key in gameData) {
+    if (isNaN(gameData[key])) {
+      delete gameData[key];
     }
+  }
+
+  try {
+    const response = await fetch("/api/firebase-config", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, ...gameData })
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      alert("✅ Данные успешно отправлены!");
+    } else {
+      console.error("Ошибка при отправке данных:", result.error);
+      alert(`❌ Ошибка: ${result.error}`);
+    }
+  } catch (error) {
+    console.error("Ошибка при запросе:", error);
+    alert("❌ Произошла ошибка при отправке данных.");
+  }
 }
+}
+sendGameData();
 
 
    // Функция загрузки данных из Firestore
