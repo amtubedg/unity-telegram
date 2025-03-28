@@ -1,6 +1,6 @@
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_KEY);
 
@@ -33,11 +33,3 @@ export default async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
-if (userId) {
-  sendScore(userId);
-} else {
-  console.error("Ошибка: UserID не найден.");
-}
