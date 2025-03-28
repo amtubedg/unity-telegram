@@ -13,8 +13,6 @@
 <body>
   <div id="unity-container" class="unity-desktop">
     <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-    <h1>Отправить Score в Firestore</h1>
-    <button onclick="sendScore()">Отправить Score</button>
     <div id="unity-loading-bar">
       <div id="unity-logo"></div>
       <div id="unity-progress-bar-empty">
@@ -32,39 +30,86 @@
   <script type="module">
 
     // Проверяем, запущено ли в Telegram Web App
-    async function sendScore() {
-      const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-      const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
-      if (!userId) {
-        alert("Ошибка: UserID не найден");
-        return;
-      }
-      
-      const score = parseInt(prompt("Введите ваш Score:"), 10);
-      if (isNaN(score)) {
-        alert("Некорректное значение. Введите число.");
-        return;
-      }
+    if (window.Telegram && window.Telegram.WebApp) {
+    let user = window.Telegram.WebApp.initDataUnsafe.user;
 
-      try {
-        const response = await fetch("/api/firebase-config", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, username, score })
-        });
+    if (user) {
+        let userId = user.id.toString();
+        let username = user.username || "Без имени";
+        alert("Добро пожаловать, " + username + "!");
+        alert("User ID: " + userId);
 
-        const result = await response.json();
-        if (response.ok) {
-          alert("✅ Score успешно отправлен!");
-        } else {
-          console.error("Ошибка при отправке Score:", result.error);
-          alert(`❌ Ошибка: ${result.error}`);
+        if (typeof unityInstance !== "undefined") {
+            unityInstance.SendMessage("Code", "SetUserID", userId);
+            unityInstance.SendMessage("Code", "SetUsername", username);
         }
-      } catch (error) {
-        console.error("Ошибка при запросе:", error);
-        alert("❌ Произошла ошибка при отправке данных.");
-      }
+
+        // Отправляем данные на безопасный backend
+        fetch("/api/firebase-config", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                userId: userId,
+                username: username
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Данные успешно сохранены через сервер");
+            } else {
+                console.warn("Ошибка при сохранении: ", data.error);
+            }
+        })
+        .catch(error => {
+            console.error("Ошибка при отправке на сервер: ", error);
+        });
+    } else {
+        alert("Пользовательские данные недоступны.");
     }
+}
+
+
+   // Функция загрузки данных из Firestore
+async function loadUserData(userId) {
+    const userDocRef = doc(db, "users", userId);
+    try {
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            let userData = userDoc.data();
+            let jsonData = JSON.stringify(userData);
+
+            alert("Данные из Firestore: " + jsonData);
+            // Отправляем в Unity
+            if (typeof unityInstance !== "undefined") {
+                unityInstance.SendMessage("Code", "SetUserDataFromFirestore", jsonData);
+            }
+        } else {
+            console.warn("Пользователь с ID", userId, "не найден в Firestore.");
+            // alert("Пользователь не найден в Firestore.");
+        }
+    } catch (error) {
+        console.error("Ошибка получения данных:", error);
+        // alert("Ошибка получения данных: " + error.message);
+    }
+}
+
+
+    // Функция сохранения данных в Firestore
+    async function saveToFirestore(userId, username) {
+        try {
+            await setDoc(doc(db, "users", userId), {
+                TelegramID: userId,
+                Username: username
+            });
+            // alert("Данные сохранены в Firestore");
+        } catch (err) {
+            // alert("Ошибка при сохранении в Firestore: ", err);
+        }
+    }
+
 
     var container = document.querySelector("#unity-container");
     var canvas = document.querySelector("#unity-canvas");
