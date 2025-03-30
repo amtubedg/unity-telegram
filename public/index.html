@@ -50,12 +50,7 @@
     experience: parseInt(prompt("Введите опыт:"), 10),
   };
 
-  // // Удаляем некорректные данные
-  // for (const key in gameData) {
-  //   if (isNaN(gameData[key])) {
-  //     delete gameData[key];
-  //   }
-  // }
+
 
   try {
     const response = await fetch("/api/firebase-config", {
@@ -209,7 +204,15 @@ async function loadUserData(userId) {
   alert(message);
   });
   };
-
+  function sendDataToUnity(userId, username) {
+  if (typeof unityInstance !== "undefined" && unityInstance !== null) {
+    unityInstance.SendMessage("Code", "SetUserID", userId);
+    unityInstance.SendMessage("Code", "SetUsername", username);
+    console.log("Данные отправлены в Unity:", { userId, username });
+  } else {
+    console.error("Unity instance не инициализирован");
+  }
+}
   document.body.appendChild(script);
 
   </script>
