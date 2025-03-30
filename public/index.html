@@ -75,6 +75,44 @@
 sendGameData();
 
 
+   // Функция загрузки данных из Firestore
+async function loadUserData(userId) {
+    const userDocRef = doc(db, "users", userId);
+    try {
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            let userData = userDoc.data();
+            let jsonData = JSON.stringify(userData);
+
+            alert("Данные из Firestore: " + jsonData);
+            // Отправляем в Unity
+            if (typeof unityInstance !== "undefined") {
+                unityInstance.SendMessage("Code", "SetUserDataFromFirestore", jsonData);
+            }
+        } else {
+            console.warn("Пользователь с ID", userId, "не найден в Firestore.");
+            // alert("Пользователь не найден в Firestore.");
+        }
+    } catch (error) {
+        console.error("Ошибка получения данных:", error);
+        // alert("Ошибка получения данных: " + error.message);
+    }
+}
+
+
+    // Функция сохранения данных в Firestore
+    async function saveToFirestore(userId, username) {
+        try {
+            await setDoc(doc(db, "users", userId), {
+                TelegramID: userId,
+                Username: username
+            });
+            // alert("Данные сохранены в Firestore");
+        } catch (err) {
+            // alert("Ошибка при сохранении в Firestore: ", err);
+        }
+    }
+
 
     var container = document.querySelector("#unity-container");
     var canvas = document.querySelector("#unity-canvas");
@@ -166,15 +204,15 @@ createUnityInstance(canvas, config, (progress) => {
   alert(message);
 });
 
-function sendDataToUnity(userId, username) {
-  if (typeof unityInstance !== "undefined" && unityInstance !== null) {
-    unityInstance.SendMessage("Code", "SetUserID", userId);
-    unityInstance.SendMessage("Code", "SetUsername", username);
-    console.log("Данные отправлены в Unity:", { userId, username });
-  } else {
-    console.error("Unity instance не инициализирован");
-  }
-}
+// function sendDataToUnity(userId, username) {
+//   if (typeof unityInstance !== "undefined" && unityInstance !== null) {
+//     unityInstance.SendMessage("Code", "SetUserID", userId);
+//     unityInstance.SendMessage("Code", "SetUsername", username);
+//     console.log("Данные отправлены в Unity:", { userId, username });
+//   } else {
+//     console.error("Unity instance не инициализирован");
+//   }
+// }
 
   document.body.appendChild(script);
 
