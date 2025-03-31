@@ -31,25 +31,16 @@
 
     // Проверяем, запущено ли в Telegram Web App
     
-    async function sendGameData() {
-  if (window.Telegram && window.Telegram.WebApp) {
-    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-    const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
-
-    if (!userId) {
-      alert("Ошибка: UserID не найден");
-      return;
-    }
-
-    console.log("UserID:", userId);
-    console.log("Username:", username);
-
-    // Передаем данные в Unity
-    sendDataToUnity(userId, username);
+      async function sendGameData() {
+        if (window.Telegram && window.Telegram.WebApp) {
+  const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+  const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
+          alert(window.Telegram.WebApp.initDataUnsafe.user.username);
+          sendDataToUnity(userId, username);
+  if (!userId) {
+    alert("Ошибка: UserID не найден");
+    return;
   }
-}
-
-
 
   // Пример данных из игры (замени на свои)
   const gameData = {
@@ -80,8 +71,18 @@
     console.error("Ошибка при запросе:", error);
     alert("❌ Произошла ошибка при отправке данных.");
   }
+}
+}
 
-sendGameData();
+function sendDataToUnity(userId, username) {
+      if (typeof unityInstance !== "undefined" && unityInstance !== null) {
+        unityInstance.SendMessage("Code", "SetUserID", userId);
+        unityInstance.SendMessage("Code", "SetUsername", username);
+        console.log("Данные отправлены в Unity:", { userId, username });
+      } else {
+        console.error("Unity instance не инициализирован");
+      }
+    }
 
     var container = document.querySelector("#unity-container");
     var canvas = document.querySelector("#unity-canvas");
@@ -164,31 +165,21 @@ script.src = loaderUrl;
 let unityInstance = null;
 
 script.onload = () => {
-  createUnityInstance(canvas, config, (progress) => {
-    progressBarFull.style.width = 100 * progress + "%";
-  }).then((instance) => {
-    unityInstance = instance;
-    loadingBar.style.display = "none";
-    fullscreenButton.onclick = () => {
-      unityInstance.SetFullscreen(1);
+      createUnityInstance(canvas, config, (progress) => {
+        progressBarFull.style.width = 100 * progress + "%";
+      }).then((instance) => {
+        unityInstance = instance;
+        loadingBar.style.display = "none";
+        fullscreenButton.onclick = () => {
+          unityInstance.SetFullscreen(1);
+        };
+        console.log("✅ Unity WebGL успешно загружен!");
+        sendGameData(); // Отправляем данные после загрузки Unity
+      }).catch((message) => {
+        alert("Ошибка при загрузке Unity: " + message);
+      });
     };
-    console.log("✅ Unity WebGL успешно загружен!");
 
-  
-  }).catch((message) => {
-    alert("Ошибка при загрузке Unity: " + message);
-  });
-};
-
-function sendDataToUnity(userId, username) {
-  if (typeof unityInstance !== "undefined" && unityInstance !== null) {
-    unityInstance.SendMessage("Code", "SetUserID", userId);
-    unityInstance.SendMessage("Code", "SetUsername", username);
-    console.log("Данные отправлены в Unity:", { userId, username });
-  } else {
-    console.error("Unity instance не инициализирован");
-  }
-}
 
 document.body.appendChild(script);
 
