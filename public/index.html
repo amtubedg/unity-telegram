@@ -71,28 +71,6 @@
 }
 }
 
-const gameData2 = {
-    
-    anun: "zarmar",
-  };
-try {
-    const response = await fetch("/api/firebase-config", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({gameData2 })
-    });
-
-    const result = await response.json();
-    if (response.ok) {
-      alert("✅ Данные успешно отправлены!");
-    } else {
-      console.error("Ошибка при отправке данных:", result.error);
-      alert(`❌ Ошибка: ${result.error}`);
-    }
-  } catch (error) {
-    console.error("Ошибка при запросе:", error);
-    alert("❌ Произошла ошибка при отправке данных.");
-  }
 
 function sendDataToUnity(userId, username) {
       if (typeof unityInstance !== "undefined" && unityInstance !== null) {
