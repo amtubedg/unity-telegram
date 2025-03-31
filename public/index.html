@@ -191,22 +191,28 @@ async function loadUserData(userId) {
   loadingBar.style.display = "block";
 
   var script = document.createElement("script");
-  script.src = loaderUrl;
-  script.onload = () => {
+script.src = loaderUrl;
+let unityInstance = null;
+
+script.onload = () => {
   createUnityInstance(canvas, config, (progress) => {
-  progressBarFull.style.width = 100 * progress + "%";
-  }).then((unityInstance) => {
-  loadingBar.style.display = "none";
-  fullscreenButton.onclick = () => {
-  unityInstance.SetFullscreen(1);
-  };
+    progressBarFull.style.width = 100 * progress + "%";
+  }).then((instance) => {
+    unityInstance = instance;
+    loadingBar.style.display = "none";
+    fullscreenButton.onclick = () => {
+      unityInstance.SetFullscreen(1);
+    };
+    console.log("✅ Unity WebGL успешно загружен!");
+
+    // Вызов функции после инициализации Unity
+    sendDataToUnity("123456", "7890123");
   }).catch((message) => {
-  alert(message);
+    alert("Ошибка при загрузке Unity: " + message);
   });
-  };
-  sendDataToUnity("123456", "7890123");
-  
-  function sendDataToUnity(userId, username) {
+};
+
+function sendDataToUnity(userId, username) {
   if (typeof unityInstance !== "undefined" && unityInstance !== null) {
     unityInstance.SendMessage("Code", "SetUserID", userId);
     unityInstance.SendMessage("Code", "SetUsername", username);
@@ -216,8 +222,7 @@ async function loadUserData(userId) {
   }
 }
 
-
-  document.body.appendChild(script);
+document.body.appendChild(script);
 
   </script>
 </body>
