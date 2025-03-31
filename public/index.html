@@ -31,15 +31,25 @@
 
     // Проверяем, запущено ли в Telegram Web App
     
-      async function sendGameData() {
-        if (window.Telegram && window.Telegram.WebApp) {
-  const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
-  const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
-          alert(window.Telegram.WebApp.initDataUnsafe.user.username);
-  if (!userId) {
-    alert("Ошибка: UserID не найден");
-    return;
+    async function sendGameData() {
+  if (window.Telegram && window.Telegram.WebApp) {
+    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString();
+    const username = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || "Unknown";
+
+    if (!userId) {
+      alert("Ошибка: UserID не найден");
+      return;
+    }
+
+    console.log("UserID:", userId);
+    console.log("Username:", username);
+
+    // Передаем данные в Unity
+    sendDataToUnity(userId, username);
   }
+}
+
+
 
   // Пример данных из игры (замени на свои)
   const gameData = {
@@ -70,49 +80,8 @@
     console.error("Ошибка при запросе:", error);
     alert("❌ Произошла ошибка при отправке данных.");
   }
-}
-}
+
 sendGameData();
-
-
-   // Функция загрузки данных из Firestore
-async function loadUserData(userId) {
-    const userDocRef = doc(db, "users", userId);
-    try {
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-            let userData = userDoc.data();
-            let jsonData = JSON.stringify(userData);
-
-            alert("Данные из Firestore: " + jsonData);
-            // Отправляем в Unity
-            if (typeof unityInstance !== "undefined") {
-                unityInstance.SendMessage("Code", "SetUserDataFromFirestore", jsonData);
-            }
-        } else {
-            console.warn("Пользователь с ID", userId, "не найден в Firestore.");
-            // alert("Пользователь не найден в Firestore.");
-        }
-    } catch (error) {
-        console.error("Ошибка получения данных:", error);
-        // alert("Ошибка получения данных: " + error.message);
-    }
-}
-
-
-    // Функция сохранения данных в Firestore
-    async function saveToFirestore(userId, username) {
-        try {
-            await setDoc(doc(db, "users", userId), {
-                TelegramID: userId,
-                Username: username
-            });
-            // alert("Данные сохранены в Firestore");
-        } catch (err) {
-            // alert("Ошибка при сохранении в Firestore: ", err);
-        }
-    }
-
 
     var container = document.querySelector("#unity-container");
     var canvas = document.querySelector("#unity-canvas");
@@ -205,8 +174,7 @@ script.onload = () => {
     };
     console.log("✅ Unity WebGL успешно загружен!");
 
-    // Вызов функции после инициализации Unity
-    sendDataToUnity(userId, username);
+  
   }).catch((message) => {
     alert("Ошибка при загрузке Unity: " + message);
   });
