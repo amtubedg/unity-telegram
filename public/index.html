@@ -206,7 +206,7 @@ script.onload = () => {
     console.log("✅ Unity WebGL успешно загружен!");
 
     // Вызов функции после инициализации Unity
-    sendDataToUnity("123456", "7890123");
+    sendDataToUnity(userId, username);
   }).catch((message) => {
     alert("Ошибка при загрузке Unity: " + message);
   });
