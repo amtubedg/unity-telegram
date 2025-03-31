@@ -204,6 +204,8 @@ async function loadUserData(userId) {
   alert(message);
   });
   };
+  sendDataToUnity("123456", "7890123");
+  
   function sendDataToUnity(userId, username) {
   if (typeof unityInstance !== "undefined" && unityInstance !== null) {
     unityInstance.SendMessage("Code", "SetUserID", userId);
@@ -214,7 +216,7 @@ async function loadUserData(userId) {
   }
 }
 
-sendDataToUnity("123456", "7890123");
+
   document.body.appendChild(script);
 
   </script>
